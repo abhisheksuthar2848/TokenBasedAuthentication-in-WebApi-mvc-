@@ -1,0 +1,242 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        /* Full-width input fields */
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        /* Set a style for all buttons */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+            button:hover {
+                opacity: 0.8;
+            }
+
+        /* Extra styles for the cancel button */
+        .cancelbtn {
+            width: auto;
+            padding: 10px 18px;
+            background-color: #f44336;
+        }
+
+        /* Center the image and position the close button */
+        .imgcontainer {
+            text-align: center;
+            margin: 24px 0 12px 0;
+            position: relative;
+        }
+
+        img.avatar {
+            width: 40%;
+            border-radius: 50%;
+        }
+
+        .container {
+            padding: 16px;
+        }
+
+        span.psw {
+            float: right;
+            padding-top: 16px;
+        }
+
+        /* The Modal (background) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        /* Modal Content/Box */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        /* The Close Button (x) */
+        .close {
+            position: absolute;
+            right: 25px;
+            top: 0;
+            color: #000;
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+            .close:hover,
+            .close:focus {
+                color: red;
+                cursor: pointer;
+            }
+
+        /* Add Zoom Animation */
+        .animate {
+            -webkit-animation: animatezoom 0.6s;
+            animation: animatezoom 0.6s
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Modal Login Form</h2>
+
+    <button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Login</button>
+
+    <div id="id01" class="modal">
+
+        <form class="modal-content animate" method="post">
+            <div class="imgcontainer">
+                <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+                @*<img src="img_avatar2.png" alt="Avatar" class="avatar">*@
+            </div>
+
+            <div class="container">
+                <label for="uname"><b>Username</b></label>
+                <input type="text" placeholder="Enter Username" id="Username" name="uname" required>
+
+                <label for="psw"><b>Password</b></label>
+                <input type="password" placeholder="Enter Password" id="Password" name="psw" required>
+
+                <button type="button" class="btn btn-success" id="btnlogin">Login</button>
+                @* <button  id="submit">Login</button>*@
+                @*<input type="button" id="submit"  class="btn btn-success" value="login" />*@
+                <label>
+                    <input type="checkbox" checked="checked" name="remember"> Remember me
+                </label>
+            </div>
+
+            <div class="container" style="background-color:#f1f1f1">
+                <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+                <span class="psw">Forgot <a href="#">password?</a></span>
+            </div>
+        </form>
+    </div>
+
+
+
+
+
+    <script>
+       
+
+        $(document).on('click', '#btnlogin', function () {
+            debugger
+           
+            var loginObj = {
+                grant_type: 'password',
+                userName: $('#Username').val(),
+                password: $('#Password').val()
+
+            };
+            $.ajax({
+                url: "http://localhost:62992/token",
+                data: loginObj,
+                type: "POST",
+                contentType: "application/x-www-form-urlencoded",
+                dataType: "json",
+                success: function (data) {
+                    debugger
+
+                    bearer = JSON.parse(JSON.stringify(data));
+                    bearer = bearer.access_token;
+
+                   // localStorage = data;
+                   
+                    window.localStorage.setItem('access_token', data.access_token);
+                    window.location.href='http://localhost:62992/Home/Index';
+                    //Authorization();
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+
+          
+
+            function Authorization() {
+
+                $.ajax({
+                    type: "GET",
+                    url: "http://localhost:62992/Api/Test//GetAllCustumer",
+                    headers: {
+
+                        //'Authorization': 'Bearer ' + bearer
+                        'Authorization': 'Bearer ' + localStorage.access_token
+                    },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        document.getElementById('id01').style.display = 'none';
+
+                        var htmlString = '';
+
+
+                        result
+                        //debugger
+                        //$.each(result, function (index,val) {
+                        for (var i = 0; i < result.data.length; i++) {
+
+
+                            //debugger
+                            htmlString += '<tr>';
+                            htmlString += '<td>' + result.data[i].CustomerId + '</td>';
+                            htmlString += '<td>' + result.data[i].Name + '</td>';
+                            htmlString += '<td>' + result.data[i].Address + '</td>';
+                            htmlString += '<td>' + result.data[i].MobileNo + '</td>';
+                            htmlString += '<td>' + formatDate(result.data[i].Birthdate) + '</td>';
+                            htmlString += '<td>' + result.data[i].Emailid + '</td>';
+                            htmlString += '<td><a href="#" onclick="return getbyID(' + result.data[i].CustomerId + ')">Edit</a> | <a href="#" onclick="Delele(' + result.data[i].CustomerId + ')">Delete</a></td>';
+                            htmlString += '</tr>';
+                        };
+                        $('.tbody').append(htmlString);
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
